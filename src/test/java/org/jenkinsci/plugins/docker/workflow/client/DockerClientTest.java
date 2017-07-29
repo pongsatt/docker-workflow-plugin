@@ -89,24 +89,50 @@ public class DockerClientTest {
     public void test_invalid_version() {
         Assert.assertNull(DockerClient.parseVersionNumber("xxx"));
     }
-    
+
     @Test
     public void test_cgroup_string_matching() {
-    	
-    	final String[] possibleCgroupStrings = new String[] {
-    		"2:cpu:/docker/3dd988081e7149463c043b5d9c57d7309e079c5e9290f91feba1cc45a04d6a5b",
-    		"4:cpuset:/system.slice/docker-3dd988081e7149463c043b5d9c57d7309e079c5e9290f91feba1cc45a04d6a5b.scope",
-    		"10:cpu,cpuacct:/docker/a9f3c3932cd81c4a74cc7e0a18c3300255159512f1d000545c42895adaf68932/docker/3dd988081e7149463c043b5d9c57d7309e079c5e9290f91feba1cc45a04d6a5b",
-            "3:cpu:/docker/4193df6bcf5fce75f3fc77f303b2ac06fb664adeb269b959b7ae17b3f8dcf329/3dd988081e7149463c043b5d9c57d7309e079c5e9290f91feba1cc45a04d6a5b"
-    	};
-    	
-    	for (final String possibleCgroupString : possibleCgroupStrings) {
-    		final Pattern pattern = Pattern.compile(DockerClient.CGROUP_MATCHER_PATTERN);
-    		Matcher matcher = pattern.matcher(possibleCgroupString);
-    		Assert.assertTrue("pattern didn't matched containerId " + possibleCgroupString, matcher.find());
-    		Assert.assertEquals("3dd988081e7149463c043b5d9c57d7309e079c5e9290f91feba1cc45a04d6a5b", matcher.group(matcher.groupCount()));
-		}
-    	
+
+        final String[] possibleCgroupStrings = new String[]{
+                "2:cpu:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "4:cpuset:/system.slice/docker-c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a.scope",
+                "10:cpu,cpuacct:/docker/a9f3c3932cd81c4a74cc7e0a18c3300255159512f1d000545c42895adaf68932/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "3:cpu:/docker/4193df6bcf5fce75f3fc77f303b2ac06fb664adeb269b959b7ae17b3f8dcf329/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+
+                // list from docker 17.06.0-ce
+                "11:memory:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "10:devices:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "9:freezer:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "8:net_cls,net_prio:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "7:cpu,cpuacct:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "6:perf_event:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "5:cpuset:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "4:pids:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "3:blkio:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "2:hugetlb:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "1:name=systemd:/docker/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+
+                // list from kubenetes 1.6
+                "11:freezer:/kubepods/besteffort/poddccc797a-6ac0-11e7-aabd-080027a4fcb9/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "10:perf_event:/kubepods/besteffort/poddccc797a-6ac0-11e7-aabd-080027a4fcb9/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "9:pids:/kubepods/besteffort/poddccc797a-6ac0-11e7-aabd-080027a4fcb9/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "8:memory:/kubepods/besteffort/poddccc797a-6ac0-11e7-aabd-080027a4fcb9/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "7:hugetlb:/kubepods/besteffort/poddccc797a-6ac0-11e7-aabd-080027a4fcb9/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "6:cpuset:/kubepods/besteffort/poddccc797a-6ac0-11e7-aabd-080027a4fcb9/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "5:blkio:/kubepods/besteffort/poddccc797a-6ac0-11e7-aabd-080027a4fcb9/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "4:net_cls,net_prio:/kubepods/besteffort/poddccc797a-6ac0-11e7-aabd-080027a4fcb9/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "3:cpu,cpuacct:/kubepods/besteffort/poddccc797a-6ac0-11e7-aabd-080027a4fcb9/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "2:devices:/kubepods/besteffort/poddccc797a-6ac0-11e7-aabd-080027a4fcb9/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a",
+                "1:name=systemd:/kubepods/besteffort/poddccc797a-6ac0-11e7-aabd-080027a4fcb9/c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a"
+        };
+
+        for (final String possibleCgroupString : possibleCgroupStrings) {
+            final Pattern pattern = Pattern.compile(DockerClient.CGROUP_MATCHER_PATTERN);
+            Matcher matcher = pattern.matcher(possibleCgroupString);
+            Assert.assertTrue("pattern didn't matched containerId " + possibleCgroupString, matcher.find());
+            Assert.assertEquals("c73619a9e285200119c6b2b0dd79cd05a467a2c73d02a732d43ec5aaafed5c1a", matcher.group(matcher.groupCount()));
+        }
+
     }
     
     private EnvVars newLaunchEnv() {
